@@ -5,6 +5,12 @@ from config import api_token
 from config import server_url
 
 
+def send_message(chat_id: int, text: str):
+    url: str = f"{api_url}{api_token}/sendMessage"
+    data = {"chat_id": chat_id, "text": text}
+    requests.post(url, data=data)
+
+
 def send_posts(chat_id: str):
     ...
 
