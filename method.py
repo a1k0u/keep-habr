@@ -1,9 +1,10 @@
-import re
-import string
+"""
 
+"""
 
 from typing import List
 from typing import Tuple
+import re
 
 import requests
 
@@ -14,6 +15,11 @@ Code = int
 
 
 def get_posts(msg: dict) -> Tuple[Code, List[Post]]:
+    """
+
+    :param msg:
+    :return:
+    """
     text = msg["text"]
     entities = msg["entities"]
     posts = []
@@ -47,6 +53,12 @@ def get_posts(msg: dict) -> Tuple[Code, List[Post]]:
 
 
 def send_message(chat_id: int, text: str) -> int:
+    """
+
+    :param chat_id:
+    :param text:
+    :return:
+    """
     url: str = f"{cfg.api_url}{cfg.api_token}/sendMessage"
     data = {"chat_id": chat_id, "text": text}
 
@@ -56,20 +68,39 @@ def send_message(chat_id: int, text: str) -> int:
 
 
 def send_posts(chat_id: str):
+    """
+
+    :param chat_id:
+    :return:
+    """
     ...
 
 
 def delete_post(chat_id: str, post_id: str):
+    """
+
+    :param chat_id:
+    :param post_id:
+    :return:
+    """
     ...
 
 
 def set_webhook() -> None:
+    """
+
+    :return:
+    """
     url: str = f"{cfg.api_url}{cfg.api_token}/setWebhook"
     response = requests.get(url, params={"url": cfg.server_url})
     print(f"Set webhook: {response.status_code}")
 
 
 def delete_webhook() -> None:
+    """
+
+    :return:
+    """
     url: str = f"{cfg.api_url}{cfg.api_token}/deleteWebhook"
     response = requests.get(url)
     print(f"Delete webhook: {response.status_code}")

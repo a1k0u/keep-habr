@@ -1,10 +1,10 @@
-import json
 from typing import Union
+import json
 
-import requests
 from flask import request, Response
 from flask import jsonify
 from flask import Response
+import requests
 
 from app import app
 from method import send_message
@@ -13,7 +13,7 @@ from validator import validate_msg
 
 
 @app.route("/", methods=["POST"])
-def process() -> Union[int, Response]:
+def process() -> Response:
     """
 
     :return:
@@ -34,7 +34,9 @@ def process() -> Union[int, Response]:
 
         code, posts = get_posts(msg)
         if code == 404:
-            return jsonify(dict(code=send_message(chat_id, "Ссылки на Хабр? Не, не слышал..")))
+            return jsonify(
+                dict(code=send_message(chat_id, "Ссылки на Хабр? Не, не слышал.."))
+            )
 
         print(posts)
 
