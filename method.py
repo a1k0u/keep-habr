@@ -1,15 +1,18 @@
 """
 
 """
-import json
-from typing import List, Tuple, Any
-from typing import Tuple
+
 import re
-import string
+import json
+
+from typing import List
+from typing import Any
+from typing import Tuple
 
 import requests
 
 import config as cfg
+from config import logger
 
 Post = Tuple[str, str]
 Code = int
@@ -42,11 +45,11 @@ def get_posts(msg: dict) -> Tuple[int, List[Post] or None]:
             continue
 
         page_content = requests.get(url).content.decode("utf-8")
-        title = re.findall(cfg.title_pattern, page_content)
 
-        print(title)
+        _head = re.findall(cfg.head, page_content)
+        _title = re.findall(cfg.title, *_head)
 
-        posts.append((title, url))
+        posts.append((*_title, url))
 
     if not posts:
         return 404, ...
@@ -54,71 +57,44 @@ def get_posts(msg: dict) -> Tuple[int, List[Post] or None]:
     return 200, posts
 
 
-def send_message(chat_id: int, text: str = "", dct=None) -> int:
+def send_message(chat_id: int, text: str, **kwargs) -> Code:
     """
 
-    :param dct:
     :param chat_id:
     :param text:
     :return:
     """
 
-    if dct is None:
-        dct = {}
-
-    url: str = f"{cfg.api_url}{cfg.api_token}/sendMessage"
-    data = {
-        "chat_id": chat_id,
-        "text": text,
-        "parse_mode": "Markdown",
-        "reply_markup": json.dumps(
-            {
-                "keyboard": [["Yes", "No"], ["Maybe"], ["1", "2", "3"]],
-                "one_time_keyboard": False,
-            }
-        ),
-    }
-
-    print(data)
+    url: str = f"{cfg.bot_access}/sendMessage"
+    data = {"chat_id": chat_id, "text": text, "parse_mode": "Markdown"}
+    data.update(kwargs)
 
     requests.post(url, data=data)
 
     return 200
 
 
-def send_posts(chat_id: str):
-    """
-
-    :param chat_id:
-    :return:
-    """
+def send_posts(*args, **kwargs):
     ...
 
 
-def delete_post(chat_id: str, post_id: str):
-    """
-
-    :param chat_id:
-    :param post_id:
-    :return:
-    """
+def delete_post(*args, **kwargs):
     ...
 
 
 def set_webhook() -> None:
-    """
+    """Set webhook on your sever"""
 
-    :return:
-    """
-    url: str = f"{cfg.api_url}{cfg.api_token}/setWebhook"
-    response = requests.get(url, params={"url": cfg.server_url})
-    print(f"Set webhook: {response.status_code}")
+    url: str = f"{cfg.bot_access}/setWebhook"
+    requests.get(url, params={"url": cfg.server_url})
+
+    logger.debug(f"Set webhook on {cfg.server_url}")
 
 
 def delete_webhook() -> None:
     """Deletes webhook from your server"""
 
-    url: str = f"{cfg.api_url}{cfg.api_token}/deleteWebhook"
+    url: str = f"{cfg.bot_access}/deleteWebhook"
     response = requests.get(url)
 
-    print(f"Delete webhook: {response.status_code}")
+    logger.debug(f"Delete webhook: {response.status_code}")

@@ -41,7 +41,7 @@ def process() -> Response:
             )
 
         send_message(
-            chat_id, text=f"\n\n".join([f"[{title}]({url})" for title, url in posts])
+            chat_id, text=f"\n".join([f"{i}. [{value[0]}]({value[1]})" for i, value in enumerate(posts)])
         )
         message_id = msg["message_id"]
         requests.post(
