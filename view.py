@@ -40,9 +40,15 @@ def process() -> Response:
                 dict(code=send_message(chat_id, "Ссылки на Хабр? Не, не слышал.."))
             )
 
-        send_message(chat_id, text=f"\n".join([f"[{title}]({url})" for title, url in posts]))
+        send_message(
+            chat_id, text=f"\n\n".join([f"[{title}]({url})" for title, url in posts])
+        )
         message_id = msg["message_id"]
-        requests.post(f"{c.api_url}{c.api_token}/deleteMessage", data={"chat_id": chat_id,
-                                                                       "message_id": message_id})
+        requests.post(
+            f"{c.api_url}{c.api_token}/deleteMessage",
+            data={"chat_id": chat_id, "message_id": message_id},
+        )
+        # requests.post(f"{c.api_url}{c.api_token}/answerCallbackQuery",
+        #               data={"callback_query_id": chat_id, "text": "ok", "show_alert": True})
 
     return jsonify(dict(code=200))

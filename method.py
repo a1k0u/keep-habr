@@ -1,10 +1,11 @@
 """
 
 """
-
-from typing import List
+import json
+from typing import List, Tuple, Any
 from typing import Tuple
 import re
+import string
 
 import requests
 
@@ -14,38 +15,38 @@ Post = Tuple[str, str]
 Code = int
 
 
-def get_posts(msg: dict) -> Tuple[Code, List[Post]]:
+def get_posts(msg: dict) -> Tuple[int, List[Post] or None]:
     """
 
     :param msg:
     :return:
     """
+
     text = msg["text"]
     entities = msg["entities"]
     posts = []
 
     for entity in entities:
         _type = entity["type"]
-        start_pos = entity["offset"]
-        end_pos = start_pos + entity["length"]
 
-        if _type == "url":
-            url = text[start_pos:end_pos]
+        if _type not in ("url", "text_link"):
+            continue
 
-            if not re.findall(cfg.url_pattern, url):
-                continue
+        url: str = (
+            entity["url"]
+            if _type == "text_link"
+            else text[(x := entity["offset"]): x + entity["length"]]
+        )
 
-            page_content = requests.get(url).content.decode("utf-8")
-            title = re.findall(cfg.title_pattern, page_content)
-            print(title)
+        if not re.findall(cfg.url_pattern, url):
+            continue
 
-            posts.append((title, url))
+        page_content = requests.get(url).content.decode("utf-8")
+        title = re.findall(cfg.title_pattern, page_content)
 
-        elif _type == "text_link":
-            title = text[start_pos:end_pos].rstrip()
-            url = entity["url"]
+        print(title)
 
-            posts.append((title, url))
+        posts.append((title, url))
 
     if not posts:
         return 404, ...
@@ -66,7 +67,18 @@ def send_message(chat_id: int, text: str = "", dct=None) -> int:
         dct = {}
 
     url: str = f"{cfg.api_url}{cfg.api_token}/sendMessage"
-    data = {"chat_id": chat_id, "text": text, "parse_mode": "Markdown"}
+    data = {
+        "chat_id": chat_id,
+        "text": text,
+        "parse_mode": "Markdown",
+        "reply_markup": json.dumps(
+            {
+                "keyboard": [["Yes", "No"], ["Maybe"], ["1", "2", "3"]],
+                "one_time_keyboard": False,
+            }
+        ),
+    }
+
     print(data)
 
     requests.post(url, data=data)
@@ -104,10 +116,9 @@ def set_webhook() -> None:
 
 
 def delete_webhook() -> None:
-    """
+    """Deletes webhook from your server"""
 
-    :return:
-    """
     url: str = f"{cfg.api_url}{cfg.api_token}/deleteWebhook"
     response = requests.get(url)
+
     print(f"Delete webhook: {response.status_code}")
