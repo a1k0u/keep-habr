@@ -37,6 +37,7 @@ def get_posts(msg: dict) -> Tuple[Code, List[Post]]:
 
             page_content = requests.get(url).content.decode("utf-8")
             title = re.findall(cfg.title_pattern, page_content)
+            print(title)
 
             posts.append((title, url))
 
@@ -52,15 +53,21 @@ def get_posts(msg: dict) -> Tuple[Code, List[Post]]:
     return 200, posts
 
 
-def send_message(chat_id: int, text: str) -> int:
+def send_message(chat_id: int, text: str = "", dct=None) -> int:
     """
 
+    :param dct:
     :param chat_id:
     :param text:
     :return:
     """
+
+    if dct is None:
+        dct = {}
+
     url: str = f"{cfg.api_url}{cfg.api_token}/sendMessage"
-    data = {"chat_id": chat_id, "text": text}
+    data = {"chat_id": chat_id, "text": text, "parse_mode": "Markdown"}
+    print(data)
 
     requests.post(url, data=data)
 
