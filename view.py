@@ -11,6 +11,7 @@ from method import send_message
 from method import get_posts
 from method import send_posts
 from validator import validate_msg
+import config as c
 
 
 @app.route("/", methods=["POST"])
@@ -40,5 +41,8 @@ def process() -> Response:
             )
 
         send_message(chat_id, text=f"\n".join([f"[{title}]({url})" for title, url in posts]))
+        message_id = msg["message_id"]
+        requests.post(f"{c.api_url}{c.api_token}/deleteMessage", data={"chat_id": chat_id,
+                                                                       "message_id": message_id})
 
     return jsonify(dict(code=200))

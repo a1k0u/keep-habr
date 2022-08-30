@@ -42,7 +42,7 @@ def get_posts(msg: dict) -> Tuple[Code, List[Post]]:
             posts.append((title, url))
 
         elif _type == "text_link":
-            title = text[start_pos:end_pos]
+            title = text[start_pos:end_pos].rstrip()
             url = entity["url"]
 
             posts.append((title, url))
