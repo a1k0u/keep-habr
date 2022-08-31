@@ -22,6 +22,8 @@ url_pattern = r"(?<=https\:\/\/habr.com\/)[\w\-\&\=\:\?\/\.]*(?=)"
 head = r"(?=\<head\ \>)[\s\S\w\W]*(?=\<\/head\>)"
 title = r"(?<=\<title\>)[\s\S\w\Wа-яА-Я]*(?=\<\/title\>)"
 
+db_name = "habr.db"
+
 if __name__ == "__main__":
     print(
         "".join(

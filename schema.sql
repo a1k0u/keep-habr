@@ -1,3 +1,6 @@
+DROP TABLE post;
+DROP TABLE user_post;
+
 CREATE TABLE IF NOT EXISTS post (
   id INTEGER PRIMARY KEY AUTOINCREMENT ,
   title TEXT NOT NULL,
@@ -7,6 +10,6 @@ CREATE TABLE IF NOT EXISTS post (
 
 CREATE TABLE IF NOT EXISTS user_post (
     chat_id INTEGER NOT NULL,
-    post INTEGER,
-    FOREIGN KEY (post) REFERENCES post(id) ON DELETE CASCADE
+    post_id INTEGER,
+    FOREIGN KEY (post_id) REFERENCES post(id)
 );
