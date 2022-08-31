@@ -38,7 +38,7 @@ def get_posts(msg: dict) -> Tuple[int, List[Post] or None]:
         url: str = (
             entity["url"]
             if _type == "text_link"
-            else text[(x := entity["offset"]): x + entity["length"]]
+            else text[(x := entity["offset"]) : x + entity["length"]]
         )
 
         if not re.findall(cfg.url_pattern, url):
@@ -68,6 +68,8 @@ def send_message(chat_id: int, text: str, **kwargs) -> Code:
     url: str = f"{cfg.bot_access}/sendMessage"
     data = {"chat_id": chat_id, "text": text, "parse_mode": "Markdown"}
     data.update(kwargs)
+    print(data)
+    print(kwargs)
 
     requests.post(url, data=data)
 
