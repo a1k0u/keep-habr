@@ -35,7 +35,7 @@ def get_cursor(func: Callable) -> Callable:
         try:
             res = func(cur, *args, **kwargs)
         except sqlite3.DatabaseError as e:
-            logger.critical(f"Rollback. Exception in db - {e}!")
+            logger.critical(f"Rollback - {func.__name__}. Exception in db - {e}!")
             con.rollback()
         else:
             con.commit()
@@ -97,6 +97,7 @@ def get_user_posts(cur: sqlite3.Cursor, chat_id: int):
         ) AS user
         JOIN post 
         ON post.id = user.post_id
+        ORDER BY post.title DESC
         """,
         (chat_id,),
     ).fetchall()
