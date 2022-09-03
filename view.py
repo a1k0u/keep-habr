@@ -64,7 +64,7 @@ def process() -> Response:
         send_message(
             chat_id,
             text="Ага, ссылочки добавил",
-            reply_markup=json.dumps({"keyboard": [[{"text": "Вывести все ссылки."}]]}),
+            reply_markup=json.dumps({"resize_keyboard": True, "keyboard": [[{"text": "Вывести все ссылки."}]]}),
         )
 
         """
