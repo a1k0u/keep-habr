@@ -10,8 +10,8 @@ from typing import Union
 from typing import Tuple
 from typing import Any
 
-from config import db_name
-from config import logger
+from app.utils.config import db_name
+from app.utils.config import logger
 
 
 def get_connection() -> sqlite3.Connection:
@@ -92,7 +92,7 @@ def get_user_posts(cur: sqlite3.Cursor, chat_id: int):
         SELECT *
         FROM (
             SELECT chat_id, post_id
-            FROM user_post 
+            FROM user_post
             WHERE chat_id = ?
         ) AS user
         JOIN post 

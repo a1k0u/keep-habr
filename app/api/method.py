@@ -11,8 +11,8 @@ from typing import Tuple
 
 import requests
 
-import config as cfg
-from config import logger
+import app.utils.config as cfg
+from app.utils.config import logger
 
 Post = Tuple[str, str]
 Code = int

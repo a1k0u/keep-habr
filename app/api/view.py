@@ -1,21 +1,27 @@
 import json
 
-
 from flask import request
 from flask import jsonify
 from flask import Response
+from flask import Blueprint
 import requests
 
-from app import app
-from method import send_message
-from method import get_posts
-from validator import validate_msg
-from emoji import get_emoji_from_int
-import config as c
-import db
+from app.api.method import send_message
+from app.api.method import get_posts
+from app.utils.validator import validate_msg
+from app.utils.emoji import get_emoji_number
+import app.utils.config as c
+import app.db.db as db
+
+api = Blueprint("api", __name__)
 
 
-@app.route("/", methods=["POST"])
+@api.route("/go", methods=["GET"])
+def index():
+    return {1: 1}
+
+
+@api.route("/", methods=["POST"])
 def process() -> Response:
     """
 
@@ -42,7 +48,7 @@ def process() -> Response:
                 chat_id,
                 text=f"\n\n".join(
                     [
-                        f"{get_emoji_from_int(i + 1)}\t[{posts[i][3]}]({posts[i][4]})"
+                        f"{get_emoji_number(i + 1)}\t[{posts[i][3]}]({posts[i][4]})"
                         for i in range(len(posts))
                     ]
                 ),
@@ -64,7 +70,12 @@ def process() -> Response:
         send_message(
             chat_id,
             text="Ага, ссылочки добавил",
-            reply_markup=json.dumps({"resize_keyboard": True, "keyboard": [[{"text": "Вывести все ссылки."}]]}),
+            reply_markup=json.dumps(
+                {
+                    "resize_keyboard": True,
+                    "keyboard": [[{"text": "Вывести все ссылки."}]],
+                }
+            ),
         )
 
         """
