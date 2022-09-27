@@ -1,24 +1,32 @@
 import json
+from typing import Tuple
 
-from flask import request
+from flask import request, Response
 from flask import jsonify
 from flask import Response
 from flask import Blueprint
 import requests
 
 from app.api.method import send_message
-from app.api.method import get_posts
+from app.api.method import get_posts_from_msg
 from app.utils.validator import validate_msg
 from app.utils.emoji import get_emoji_number
-import app.utils.config as c
 import app.db.db as db
+import app.utils.config as c
+import app.utils.answer_phrase as phr
+import app.utils.keyboard as keyboard
 
 api = Blueprint("api", __name__)
 
 
-@api.route("/go", methods=["GET"])
-def index():
-    return {1: 1}
+def __out_put_posts(posts):
+    return f"\n\n".join(
+        [
+            f"{get_emoji_number(i + 1)}\t" 
+            f"[{posts[i][3]}]({posts[i][4]})"
+            for i in range(len(posts))
+        ]
+    )
 
 
 @api.route("/", methods=["POST"])
@@ -30,7 +38,7 @@ def process() -> Response:
 
     update = request.json
 
-    with open("a.json", "w") as f:
+    with open("last_update.json", "w") as f:
         f.write(json.dumps(update, indent=4))
 
     msg = update.get("message", None)
@@ -39,76 +47,25 @@ def process() -> Response:
         code, message = validate_msg(msg)
 
         if code == 404:
-            return jsonify(dict(code=send_message(chat_id, message)))
+            send_message(chat_id, message)
 
         if code == 201:
             posts = db.get_user_posts(chat_id)
-            print(posts)
             send_message(
                 chat_id,
-                text=f"\n\n".join(
-                    [
-                        f"{get_emoji_number(i + 1)}\t[{posts[i][3]}]({posts[i][4]})"
-                        for i in range(len(posts))
-                    ]
-                ),
+                text=__out_put_posts(posts),
             )
 
-            return jsonify(dict(code=200))
+        if code == 200:
+            _code, posts = get_posts_from_msg(msg)
+            if _code == 404:
+                send_message(chat_id, phr.NO_HABR_LINKS)
+            else:
+                for post in posts:
+                    db.add_post_to_user(chat_id, *post)
 
-        else:
-            code, posts = get_posts(msg)
+                send_message(
+                    chat_id, text=phr.ADDED_LINKS, reply_markup=keyboard.reply_keyboard
+                )
 
-        if code == 404:
-            return jsonify(
-                dict(code=send_message(chat_id, "Ссылки на Хабр? Не, не слышал.."))
-            )
-
-        for post in posts:
-            db.add_post_to_user(chat_id, *post)
-
-        send_message(
-            chat_id,
-            text="Ага, ссылочки добавил",
-            reply_markup=json.dumps(
-                {
-                    "resize_keyboard": True,
-                    "keyboard": [[{"text": "Вывести все ссылки."}]],
-                }
-            ),
-        )
-
-        """
-        posts_per_page = 5
-        amount_posts = len(posts)
-        amount_pages = amount_posts // posts_per_page
-        current_page = 1
-        send_message(
-            chat_id,
-            text=f"\n\n".join(
-                [f"{get_emoji_from_int(i + 1)}\t[{posts[i][0]}]({posts[i][1]})"
-                 for i in range((current_page - 1) * posts_per_page, min(current_page * posts_per_page, amount_posts))]),
-            reply_markup=json.dumps(
-                {
-                    "inline_keyboard": [
-                        [
-                            {"text": f"\U00002039 {(x := current_page - 1)}", "callback_data": x},
-                            {"text": f"\U00000387 {current_page} \U00000387", "callback_data": current_page},
-                            {"text": f"{(y := current_page + 1)} \U0000203A", "callback_data": y}
-                        ]
-                    ]
-                }
-            ),
-        )
-        
-        message_id = msg["message_id"]
-        requests.post(
-            f"{c.api_url}{c.api_token}/deleteMessage",
-            data={"chat_id": chat_id, "message_id": message_id},
-        )
-        """
-
-        # requests.post(f"{c.api_url}{c.api_token}/answerCallbackQuery",
-        #               data={"callback_query_id": chat_id, "text": "ok", "show_alert": True})
-
-    return jsonify(dict(code=200))
+    return jsonify({"msg": "ok"})

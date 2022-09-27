@@ -18,7 +18,7 @@ Post = Tuple[str, str]
 Code = int
 
 
-def get_posts(msg: dict) -> Tuple[int, List[Post] or None]:
+def get_posts_from_msg(msg: dict) -> Tuple[int, List[Post] or None]:
     """
 
     :param msg:
@@ -38,7 +38,7 @@ def get_posts(msg: dict) -> Tuple[int, List[Post] or None]:
         url: str = (
             entity["url"]
             if _type == "text_link"
-            else text[(x := entity["offset"]) : x + entity["length"]]
+            else text[(x := entity["offset"]): x + entity["length"]]
         )
 
         if not re.findall(cfg.url_pattern, url):
